@@ -24,7 +24,8 @@ import NetworkPage from './pages/authenticated/NetworkPage.jsx';
 import CompanyProfilePage from './pages/employer/CompanyProfilePage.jsx';
 import TalentPoolPage from './pages/employer/TalentPoolPage.jsx';
 import PremiumShowcase from './pages/showcase/PremiumShowcase.jsx';
-
+import { useEffect, useState } from 'react'
+import { supabase } from './lib/supabaseClient'
 const App = () => {
   // Check URL hash for showcase routes
   const getInitialView = () => {
@@ -347,5 +348,31 @@ const App = () => {
     </ToastProvider>
   );
 };
+function App() {
+  const [connectionStatus, setConnectionStatus] = useState("Testing...")
+
+  useEffect(() => {
+    async function checkConnection() {
+      // We try to fetch something very small just to test the bridge
+      const { data, error } = await supabase.from('any_table_name').select('*').limit(1)
+      
+      if (error) {
+        setConnectionStatus(`❌ Error: ${error.message}`)
+      } else {
+        setConnectionStatus("✅ Connected to Supabase!")
+      }
+    }
+
+    checkConnection()
+  }, [])
+
+  return (
+    <div>
+      <h1>My App</h1>
+      <p>Status: {connectionStatus}</p>
+    </div>
+  )
+}
+
 
 export default App;
