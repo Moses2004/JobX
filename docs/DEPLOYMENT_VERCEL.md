@@ -1,4 +1,4 @@
-# 🚀 JobX - Ready for Vercel Deployment
+st # 🚀 JobX - Ready for Vercel Deployment
 
 ## ✅ What's Been Prepared
 
