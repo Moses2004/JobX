@@ -1,6 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { ToastProvider, useToast } from './contexts/ToastContext.jsx';
-import { AuthProvider, useAuth } from './contexts/AuthContext.jsx';
+import React, { useState } from 'react';
+import { ToastProvider } from './contexts/ToastContext.jsx';
 import JobXLanding from './pages/public/JobXLanding.jsx';
 import JobXAuth from './pages/auth/JobXAuth.jsx';
 import RoleSelection from './pages/auth/RoleSelection.jsx';

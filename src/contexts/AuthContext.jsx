@@ -17,37 +17,6 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true)
   const [session, setSession] = useState(null)
 
-  // Initialize auth state
-  useEffect(() => {
-    // Get initial session
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session)
-      setUser(session?.user ?? null)
-      if (session?.user) {
-        fetchUserProfile(session.user.id)
-      } else {
-        setLoading(false)
-      }
-    })
-
-    // Listen for auth changes
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
-      setSession(session)
-      setUser(session?.user ?? null)
-      
-      if (session?.user) {
-        fetchUserProfile(session.user.id)
-      } else {
-        setUserData(null)
-        setLoading(false)
-      }
-    })
-
-    return () => subscription.unsubscribe()
-  }, [])
-
   // Fetch user profile from database
   const fetchUserProfile = async (userId) => {
     try {
@@ -77,6 +46,50 @@ export const AuthProvider = ({ children }) => {
       setLoading(false)
     }
   }
+
+  // Initialize auth state
+  useEffect(() => {
+    // Only initialize Supabase if configured
+    const initAuth = async () => {
+      try {
+        // Get initial session
+        const { data: { session } } = await supabase.auth.getSession()
+        setSession(session)
+        setUser(session?.user ?? null)
+        if (session?.user) {
+          await fetchUserProfile(session.user.id)
+        } else {
+          setLoading(false)
+        }
+
+        // Listen for auth changes
+        const {
+          data: { subscription },
+        } = supabase.auth.onAuthStateChange(async (_event, session) => {
+          setSession(session)
+          setUser(session?.user ?? null)
+          
+          if (session?.user) {
+            await fetchUserProfile(session.user.id)
+          } else {
+            setUserData(null)
+            setLoading(false)
+          }
+        })
+
+        return () => {
+          if (subscription) {
+            subscription.unsubscribe()
+          }
+        }
+      } catch (error) {
+        console.warn('Supabase not configured or error initializing auth:', error.message)
+        setLoading(false)
+      }
+    }
+
+    initAuth()
+  }, [])
 
   // Sign up with email and password
   const signUp = async (email, password, userData = {}) => {
