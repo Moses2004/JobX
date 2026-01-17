@@ -24,8 +24,8 @@ import NetworkPage from './pages/authenticated/NetworkPage.jsx';
 import CompanyProfilePage from './pages/employer/CompanyProfilePage.jsx';
 import TalentPoolPage from './pages/employer/TalentPoolPage.jsx';
 import PremiumShowcase from './pages/showcase/PremiumShowcase.jsx';
-
 import { supabase } from './lib/supabaseClient'
+
 const App = () => {
   // Check URL hash for showcase routes
   const getInitialView = () => {
@@ -35,6 +35,21 @@ const App = () => {
     if (hash === '#navigation') return 'navigation';
     return 'landing';
   };
+
+  const [connectionStatus, setConnectionStatus] = useState("Testing...");
+
+  useEffect(() => {
+    async function checkConnection() {
+      const { data, error } = await supabase.from('profiles').select('*').limit(1);
+      if (error) {
+        setConnectionStatus(`❌ Error: ${error.message}`);
+        console.error("Supabase Error:", error);
+      } else {
+        setConnectionStatus("✅ Connected to Supabase!");
+      }
+    }
+    checkConnection();
+  }, []);
 
   const [currentView, setCurrentView] = useState(getInitialView()); // 'landing', 'auth', 'role-selection', 'dashboard', 'community', 'projects', 'profile', 'showcase', 'feedback', 'applications', 'employer', 'employer-onboarding'
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -348,31 +363,18 @@ const App = () => {
     </ToastProvider>
   );
 };
-function App() {
-  const [connectionStatus, setConnectionStatus] = useState("Testing...")
 
-  useEffect(() => {
-    async function checkConnection() {
-      // We try to fetch something very small just to test the bridge
-      const { data, error } = await supabase.from('any_table_name').select('*').limit(1)
-      
-      if (error) {
-        setConnectionStatus(`❌ Error: ${error.message}`)
-      } else {
-        setConnectionStatus("✅ Connected to Supabase!")
-      }
-    }
-
-    checkConnection()
-  }, [])
-
-  return (
-    <div>
-      <h1>My App</h1>
-      <p>Status: {connectionStatus}</p>
+return (
+  <ToastProvider>
+    {/* 2. Add this small div here so you can see the status on your screen */}
+    <div style={{ position: 'fixed', bottom: 10, left: 10, zIndex: 9999, background: 'white', padding: '5px', borderRadius: '5px', border: '1px solid #ccc', fontSize: '10px' }}>
+      Supabase: {connectionStatus}
     </div>
-  )
-}
-
+    
+    {page}
+    <MessagingDrawer open={isMessagesOpen} onClose={handleCloseMessages} currentUser={userData} />
+  </ToastProvider>
+);
+};
 
 export default App;
